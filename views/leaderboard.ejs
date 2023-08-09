@@ -1,0 +1,19 @@
+<h1>Leaderboard</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Username</th>
+      <th>Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for (let i = 0; i < users.length; i++) { %>
+      <tr>
+        <td><%= i + 1 %></td>
+        <td><%= users[i].username %></td>
+        <td><%= users[i].score %></td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>

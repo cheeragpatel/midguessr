@@ -2,18 +2,27 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Geoguessr</title>
+  <title>Midguessr</title>
   <style>
     #map {
       height: 400px;
       width: 100%;
     }
+    img {
+      max-width: 100%; /* Resize the photo to match the screen size */
+      max-height: 50vh; /* Resize the image to take up 1/2 of the vertical space */
+
+    }
   </style>
 </head>
 <body>
-  <h1>Where in the world is this?</h1>
-  <img src="/photos/<%= photo.url %>" alt="Photo">
+  <h1>Where in the world is Mid?</h1>
+  <img src="/photos/<%= photo[0].filename %>" alt="Photo">
   <form method="post" action="/guess">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+    </div>
     <div>
       <label for="lat">Latitude:</label>
       <input type="number" name="lat" id="lat" step="any" required>
@@ -22,24 +31,53 @@
       <label for="lng">Longitude:</label>
       <input type="number" name="lng" id="lng" step="any" required>
     </div>
-    <input type="hidden" name="photo" value="<%= photo.url %>">
+    <input type="hidden" name="photo" value="<%= photo[0].filename %>">
     <button type="submit">Guess</button>
   </form>
   <div id="map"></div>
   <script>
     function initMap() {
-      const lat = <%= photo.lat %>;
-      const lng = <%= photo.lng %>;
+      // random lat lng
+      lat = Math.random() * 180 - 90;
+      lng = Math.random() * 360 - 180;
       const map = new google.maps.Map(document.getElementById("map"), {
         center: { lat, lng },
         zoom: 2
       });
       const marker = new google.maps.Marker({
         position: { lat, lng },
-        map
+        map,
+        draggable: true // Make the marker draggable
+      });
+      // Listen for the dragend event on the marker
+      marker.addListener("dragend", () => {
+        const position = marker.getPosition();
+        document.getElementById("lat").value = position.lat();
+        document.getElementById("lng").value = position.lng();
       });
     }
   </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=<%= process.env.GMAPS_API_KEY %>&callback=initMap" async defer></script>
+
+<h2>Leaderboard</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Username</th>
+      <th>Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for (let i = 0; i < users.length; i++) { %>
+      <tr>
+        <td><%= i + 1 %></td>
+        <td><%= users[i].username %></td>
+        <td><%= users[i].score %></td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
+
 </body>
 </html>
